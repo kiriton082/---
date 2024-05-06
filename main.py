@@ -37,33 +37,45 @@ class Player(GameSprite):
             self.rect.y -= self.speed
         if keys_pressed[K_DOWN] and self.rect.y < 400:
             self.rect.y += self.speed
-
+score_2 = 0
 score_1 = 0
 class Enemy(GameSprite):
     def update(self):
         global score_1
+        global score_2
         if self.rect.x <= 660 and self.rect.x >= 10:
             self.rect.x += self.speed_x
         if self.rect.y <= 460 and self.rect.y >= 10:
             self.rect.y += self.speed_y
 
-        if self.rect.x == 660 or self.rect.x == 10:
+        if self.rect.x == 660:
+            self.speed_x = self.speed_x*-1
+            score_2 -= 1
+
+        if self.rect.x == 10:
             self.speed_x = self.speed_x*-1
             score_1 -= 1
 
         if self.rect.y == 460 or self.rect.y == 10: 
             self.speed_y = self.speed_y*-1
+
+        
+
         
 
 font.init()
 font = font.SysFont("Arial", 30)
 
-win = font.render('Ты всё таки победил..', True, (0, 255, 0))
-lose = font.render('КАПЕЦ ):(', True, (255, 0, 0))
+win = font.render('Игрок 1 выиграл', True, (0, 255, 0))
+win_2 = font.render('Игрок 2 выиграл', True, (0, 255, 0))
+lose = font.render('капец вы конечно..', True, (255, 0, 0))
+
+player_1 = font.render('Игрок 1', True, (255, 255, 255))
+player_2 = font.render('Игрок 2', True, (255, 255, 255))
 
 racket_1 = Player("rocket.png", 10, 390, 10, 30, 100)
 racket_2 = Player("rocket.png", 660, 390, 10, 30, 100)
-ball = Enemy("ball.png", 300, 250, 5, 30, 30)
+ball = Enemy("ball.png", 300, 250, 10, 30, 30)
 
 finish = False
 game = True
@@ -71,21 +83,45 @@ while game:
     for e in event.get():
         if e.type == QUIT:
             game = False
-    window.fill((0,0,255))
+    if not finish:
+        window.fill((0,0,255))
+        if score_1 >=5:
+            window.blit(win, (250,250))
+            finish = True
 
-    racket_1.reset()
-    racket_1.update_1()
+        if score_2 >=5:
+            window.blit(win_2, (250,250))
+            finish = True
+        
+        if score_1 <=-2 or score_2 <=-2:
+            window.blit(lose, (250,250))
+            finish = True
 
-    racket_2.reset()
-    racket_2.update_2()
+        racket_1.reset()
+        racket_1.update_1()
 
-    ball.reset()
-    ball.update()
-    
-    score = font.render('Счёт: ' + str(score_1), True, (255, 255, 255))
-    window.blit(score, (300, 10))
-    
+        racket_2.reset()
+        racket_2.update_2()
 
-    display.update()
+        ball.reset()
+        ball.update()
+
+        if sprite.collide_rect(ball, racket_1):
+            ball.speed_x = ball.speed_x*-1
+            score_1 +=1
+
+        if sprite.collide_rect(ball, racket_2):
+            ball.speed_x = ball.speed_x*-1
+            score_2 +=1  
+        
+        window.blit(player_1, (10, 465))
+        window.blit(player_2, (600, 465))
+
+        score = font.render('Счёт: ' + str(score_1), True, (255, 255, 255))
+        window.blit(score, (10, 10))
+        score2 = font.render('Счёт: ' + str(score_2), True, (255, 255, 255))
+        window.blit(score2, (600, 10))
+
+        display.update()
 
     clock.tick(FPS)
